@@ -26,8 +26,11 @@
     } else {
       $(this).removeClass('accepted-word');
     }
+    // Remove the 'accepted word style' from the rest of the columns
     $(this).next('td').removeClass('accepted-word');
+    $(this).next('td').next('td').removeClass('accepted-word');
     $(this).prev('td').removeClass('accepted-word');
+    $(this).prev('td').prev('td').removeClass('accepted-word');
   });
 
   // The previous inputs should be assigned back to the input

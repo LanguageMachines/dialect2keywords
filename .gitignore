@@ -11,7 +11,7 @@ __pycache__/
 # Custom
 *.sqlite3
 creds.sh
-models/
+environment*variables*
 media/*.txt
 
 # PyCharm

@@ -114,11 +114,47 @@ def get_closest(dialect_word, vocabulary, distance_limit=1):
     return vocab_, min({c['distance'] for c in vocab_})
 
 def alternate_dialect(dialect_word, combinations, vocabulary, modifiers, step=0, min_distance=None):
+    """Recursively creates alternatives to the dialect word by manipulating it based on the rules
+    until it creates a dictionary version or exhausts the options.
 
+    Parameters
+    ----------
+    dialect_word : string
+        Give the dialect word that needs to be modified
+
+    combinations : list of dictionaries
+        Contains the candidate results. The variable modified during the recursion.
+
+    vocabulary : list of dictionaries
+        List of known "dictionary" versions of the words.
+        The vocabulary should contain both 'modified' and the original 'trefwoord'
+        versions under the keys named the same. The 'modified' versions should
+        be created with :func:`clean_str_word()` function.
+
+    modifiers : list of dictionaries
+        The rule set that contains which modifications should be performed.
+        Example can be found in rules.py file.
+
+    step : integer, (default=0)
+        The parameter set for the recursion. Inicates which of the sections in the
+        rule set is up next for the processing
+
+    min_distance : integer, (default=None)
+        The parameter set for the recursion. Contains the minimum found edit distance
+        from the comparisons to the vocabulary.
+
+    Returns
+    -------
+    combinations : list of dictionaries
+        Contains the closest detected dictionary versions after the modifications.
+    """
     input_ = {'dialect': dialect_word}
+    # Find the closest dictionary keyword to the given dialect word
     input_['estimates'], input_['distance'] = get_closest(input_['dialect'], vocabulary)
+    # The comparison of the given dialect to the vocabualry is already a result;
     combinations.append(input_)
 
+    # If the minimum distance is not given, take the minimum distance of the given dialect word
     if not min_distance:
         min_distance = input_['distance']
 
@@ -130,37 +166,57 @@ def alternate_dialect(dialect_word, combinations, vocabulary, modifiers, step=0,
         if curr_dist > min_distance:
             continue
 
+        # Modifiers have different sections.
+        # `step` variable here decides which set's turn it is currently.
+        # `fr` variable here is the string candidate to be modified
+        # `to_list` contains strings that the candidate will be modified into
         for fr, to_list in modifiers[step].items():
 
+            # If the candidate string exists in the dialect word
             if fr in dialect:
 
                 for to in to_list:
 
+                    # Modify the dialect to create the alternative
                     alternated_word = re.sub(fr, to, dialect).strip()
+                    # Find the closest dictionary keyword to the alternated version
                     estimates, alt_dist = get_closest(alternated_word, vocabulary)
 
+                    # If the minimum possible distance of the alternated is smaller than
+                    # the minimum calculated distance of the given dialect word
                     if alt_dist < curr_dist:
 
                         # Add the new alternated word to the list of combinations.
                         # Append adds the value to the end of the list.
                         # This newly added item will also be alternated
-                        # in next steps the same loop.
+                        # in next steps in the same loop.
                         combinations.append({
                             'dialect': alternated_word,
                             'estimates': estimates,
                             'distance': alt_dist
                         })
 
+                        # Check if the newly calculated distance is the minimum so far.
+                        # If so, update the global minimum distance
                         if alt_dist < min_distance:
                             min_distance = alt_dist
 
+    # Only leave the combinations with minimum distance calculated so far
     combinations = [c for c in combinations if c['distance'] == min_distance]
+    # Duplicate elimination is needed since modifications may create the same alternatives
     combinations = list({c['dialect']: c for c in combinations}.values())
+    # Sorted based on the distance
     combinations = sorted(combinations, key=lambda k: k['distance'])
 
+    # If any of the alternatives reached to a dictionary version (min_distance==0),
+    # stop the recursion and return. Otherwise, call the function one more time.
+    # WARNING: Althouth ending the function here speeds up the processing,
+    #          the downside is we cannot control whether it is the correct result.
     if min_distance > 0:
         step += 1
+        # If the sections of the modifiers is not yet exhausted;
         if step < len(modifiers):
+            # Call the function itself again to proceed to the next step
             combinations = alternate_dialect(dialect_word, combinations,
                                              vocabulary, modifiers,
                                              step, min_distance)
@@ -171,12 +227,25 @@ def process_single_word(dialect_word, max_return=1, **kwargs):
     """Apply the rule-based prediction algorithm on a single word at once
 
     Parameters
-    <..>
+    ----------
+    dialect_word : string
+        Give the dialect word that needs to be processed
+
+    max_return : integer, (default=1)
+        Limits the number of predictions made by the algorithm.
+
+    **kwargs
+        Given to the :func:`alternate_dialect()` function.
+
+    Returns
+    -------
+    keywords : list of dictionaries
+        The predictions done by the algorithm.
     """
     estimates = []
     keywords = []
 
-    # Run the prediction algorithm
+    # Obtain the predictions done by alternating the dialect word.
     combs = alternate_dialect(dialect_word, [], **kwargs)
 
     if combs:
@@ -199,7 +268,20 @@ def process_single_word(dialect_word, max_return=1, **kwargs):
     return keywords
 
 def apply_phonetisaurus(dialect_words_list, model_path='./models/phonetisaurus-model.fst'):
-    """
+    """Runs the Phonetisaurus model and returns its predictions on a given list of dialect words
+
+    Parameters
+    ----------
+    dialect_words_list : list of strings
+        Give the list contains the dialect words that needs to be processed
+
+    model_path : string, (default='./models/phonetisaurus-model.fst')
+        The path of the desired Phonetisaurus model file.
+
+    Returns
+    -------
+    phonetisaurus_keyword_list : list of strings
+        The list of predictions done by the Phonetisaurus model.
     """
     # Currently phonetisaurus in our system is a script that accepts files as input
     # Hence, we write our input into a temporary file first
@@ -238,8 +320,18 @@ def apply_phonetisaurus(dialect_words_list, model_path='./models/phonetisaurus-m
 
     return phonetisaurus_keyword_list
 
-def process_file(file_name, email_address):
-    """
+def process_file(file_name, email_address=''):
+    """A wrapper function that reads data from file, runs the algorithms, writes
+    the results to a file, and sends a notification email to the given email address
+
+    Parameters
+    ----------
+    file_name : string
+        The path to the file taht should be processed. The function uses Django's
+        :class:`FileSystemStorage()` to read the file.
+
+    email_address : string, (default='')
+        The email address that should be notified when the processing is completed.
     """
     fs = FileSystemStorage()
 

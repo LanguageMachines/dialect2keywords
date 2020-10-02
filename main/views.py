@@ -17,8 +17,8 @@ from text_processing import process_file
 def load_data(folder_name, file_name):
     """A helper class to load a "processed" file from the media folder
 
-    .. warning:: This function does not return a file not found error. Instead,
-                 it returns an empty list if the file is not found.
+    .. warning:: This function never returns a "file not found error". Instead,
+                 it returns an empty list if the file is not found at te path.
 
     Parameters
     ----------
@@ -60,12 +60,13 @@ def load_data(folder_name, file_name):
     return data_
 
 def home(request):
-    """Loads the Home page"""
+    """Loads the Home page
+    """
     return render(request, 'home.html', {})
 
 def upload(request):
-    """File upload code that runs when the 'Upload' button is clicked"""
-
+    """File upload code that runs when the 'Upload' button is clicked
+    """
     # The files are uploaded in a form,
     # and so, we capture the action as a POST request here
     if request.method == 'POST':
@@ -99,8 +100,8 @@ def upload(request):
     })
 
 def words(request, folder_name, file_name):
-    """Reads the processed data from the file system and sends it to the front end"""
-
+    """Reads the processed data from the file system and sends it to the front end
+    """
     # The page number for the paginator
     page = request.GET.get('page', 1) # integer, (default=1)
     page_range = []
@@ -191,8 +192,8 @@ def save(request, folder_name, file_name, page):
     return redirect('/words/' + folder_name + '/' + file_name  + '/?page=' + str(page))
 
 def download(request, folder_name, file_name):
-    """Function to download files from the media folder"""
-
+    """Function to download files from the media folder
+    """
     fs = FileSystemStorage()
     response = FileResponse(fs.open(folder_name + '/' + file_name + '.tsv', 'rb'), content_type='application/force-download')
     response['Content-Disposition'] = 'attachment; filename="' + file_name + '.tsv"'
@@ -200,8 +201,8 @@ def download(request, folder_name, file_name):
     return response
 
 def files(request, folder_name):
-    """Retrieves the processed file names previously uploaded under the same folder_name"""
-
+    """Retrieves the processed file names previously uploaded under the same folder_name
+    """
     # Read the file names from the folder of the user
     # Returns a list of file names without the file extensions
     file_names = [os.path.splitext(os.path.basename(file_path))[0]
