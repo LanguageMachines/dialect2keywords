@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+  <h4>The files uploaded under the folder "<b>{{ folder_name }}</b>":</h4>
+
+  {% if file_names %}
+    <ul>
+        {% for fn in file_names %}
+          <li><a href="{% url 'words' folder_name fn %}">{{ fn }}</a></li>
+        {% endfor %}
+    </ul>
+  {% else %}
+    <p>Currently there is no file uploaded.</p>
+  {% endif %}
+
+{% endblock %}
+
+{% block js %}
+
+  <script src="{% static 'js/main.js' %}"></script>
+
+{% endblock%}

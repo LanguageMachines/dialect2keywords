@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+  {% if words %}
+
+    <table class="table align-center table-bordered">
+      <thead>
+        <tr>
+          <th>Dialect Word</th>
+          <th>First Estimate</th>
+          <th>Second Estimate</th>
+          <th>Your Selection & Input</th>
+        </tr>
+      </thead>
+      <tbody>
+        <form method="post" id='data-input-form' enctype="multipart/form-data" action="{% url 'save' folder_name file_name page %}">
+          {% csrf_token %}
+          {% for w in words %}
+            <tr>
+              <td class="estimate acceptWord" data-text="{{ w.0 }}" data-confidence="-">
+                {{ w.0 }}
+              </td>
+              <td class="estimate acceptWord" data-text="{{ w.1 }}" data-confidence="{{ w.2 }}">
+                {{ w.1 }}
+              </td>
+              <td class="estimate acceptWord" data-text="{{ w.3 }}" data-confidence="{{ w.4 }}">
+                {{ w.3 }}
+              </td>
+              <td class="user-input-col">
+                <input type="text" class="user-input" name="input-for-{{ w.0 }}" style="width:100%; padding:2px 10px;"/>
+              </td>
+            </tr>
+          {% endfor %}
+          <tr>
+            <td colspan=3></td>
+            <td class="user-input-col" id="save-btn-col">
+              <button name="save-input-data" type="submit" class="btn btn-primary">Save Changes to File</button>
+            </td>
+          </tr>
+        </form>
+      </tbody>
+    </table>
+
+    {% if words.has_other_pages %}
+      <nav aria-label="Page navigation example">
+        <ul class="pagination justify-content-center">
+          {% if words.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page={{ words.previous_page_number }}">&laquo;</a></li>
+          {% else %}
+            <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+          {% endif %}
+          {% for i in page_range %}
+            {% if words.number == i %}
+              <li class="page-item active"><span class="page-link">{{ i }} <span class="page-link sr-only">(current)</span></span></li>
+            {% else %}
+              <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+            {% endif %}
+          {% endfor %}
+          {% if words.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ words.next_page_number }}">&raquo;</a></li>
+          {% else %}
+            <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+          {% endif %}
+        </ul>
+      </nav>
+    {% endif %}
+
+  {% else %}
+
+    <p>
+      <h1>404</h1>
+      <h2>File not found.</h2>
+      <p>The requested file does not exists or the processing of the file is not finished yet.</p>
+    </p>
+
+  {% endif %}
+
+{% endblock %}
+
+{% block js %}
+
+  <script type="text/javascript">
+
+    // Read the previous input user and convert it to an array by split
+    window.prevUserInputs = "{{ prev_user_input }}".split('|');
+
+  </script>
+
+  <script src="{% static 'js/main.js' %}"></script>
+
+{% endblock%}

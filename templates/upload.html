@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+  {% if data_url %}
+
+    <h2>File processing started</h2>
+
+    <div>
+      <p>
+        We started processing your file. You will receive an email as soon as it is ready!
+      </p>
+      <p>
+        You can also save the following link and try later:
+        <br>
+        <a href="{{ data_url }}">{{ data_url }}</a>
+      </p>
+    </div>
+
+  {% endif %}
+
+{% endblock%}

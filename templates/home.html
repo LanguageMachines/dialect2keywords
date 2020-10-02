@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+  <h1>Dialect2keyword</h1>
+
+  <div class="justified-text">
+    <p>
+      This webinterface is designed to convert words in Dutch dialects ("dialectopgaven") into standard Dutch keywords ("vernederlandste trefwoorden") which can be used as the basis for interoperable searches through various dialect dictionaries.
+    </p>
+    <p>
+      You can upload a list of Dutch dialect words (UTF8-format). These will be automatically converted to suggestions for keywords. This may take a while, but the tool will send you an email when it is done. After that the tool will display a couple of suggestions for keywords, from which you can select the correct one. Alternatively you can copy the closest one, and correct it  manually. When you are done you can download the result as a text file..
+    </p>
+    <p>
+      The website will ask you for your email address so that it can give you notice when it is ready with the automatic conversion. Your email address will be discarded from our system immediately after and not be used for any other purpose. The website also asks you to provide a folder name for making it easier to find the previously processed files. The folder name can be any string without spaces that you will remember.
+    </p>
+    <p>
+      Comments and suggestions: please send them to h.vandenheuvel at let .ru.nl.
+    </p>
+  </div>
+
+  <h4>Upload Your File</h4>
+
+  <div>
+    <ul>
+      <li>File has to be a <span style="color:red;">.txt</span> file.</li>
+      <li>File needs to contain a dialect word at each line.</li>
+      <li>The line separator should be "<span style="color:red;">\n</span>".</li>
+      <li>Folder name cannot contain spaces.</li>
+    </ul>
+  </div>
+
+  <div>
+    <form method="post" id='upload-form' enctype="multipart/form-data" action="{% url 'upload' %}">
+      {% csrf_token %}
+      <input type="file" name="upfile" required>
+      <input type="text" placeholder="Enter a folder name" name="folder_name" required>
+      <input type="email" placeholder="Enter your email address" name="email-address" required>
+      <button name="upload-dataset" type="submit">Upload</button>
+    </form>
+  </div>
+
+{% endblock%}
+
+<!-- Folowing line overwrites the action buttons defined in the base.html -->
+{% block action-buttons %}{% endblock%}
