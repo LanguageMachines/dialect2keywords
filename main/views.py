@@ -82,7 +82,7 @@ def upload(request):
         file_name = fs.save(folder_name + '/' + upfile.name, upfile)
         file_name = file_name.split('.txt')[0]
         # Data URL is shown back on the webpage after the successful upload
-        data_url = 'http://localhost:8000/words/' + file_name + '_processed/'
+        data_url = 'https://dialect2keyword.cls.ru.nl/words/' + file_name + '_processed/'
 
         # Here we call the function that will process the uploaded data_
         # We use parallel processing to be able to load the next page
