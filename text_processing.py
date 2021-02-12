@@ -370,7 +370,7 @@ def process_file(file_name, email_address=''):
         ('Dear user,\n\n'
          'We have completed processing your data. '
          'Please visit the following link to check it on or website.\n'
-         'http://localhost:8000/words/' + file_name + '_processed/ \n\n'
+         'https://dialect2keyword.cls.ru.nl/words/' + file_name + '_processed/ \n\n'
          'Kind regards,\n\nSite admin\nCentre for Language and Speech Technologies\n'
          'Radboud University Nijmegen\n\nEmail: h.vandenheuvel@let.ru.nl'),
         'relevancerr@gmail.com',
